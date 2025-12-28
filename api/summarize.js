@@ -26,7 +26,9 @@ export default async function handler(req, res) {
     try {
       transcriptData = await getTranscript({ videoId });
     } catch (e) {
-      return res.status(400).json({ error: 'Transcript not available for this video' });
+      return res.status(400).json({ 
+  error: 'No transcript found. Try a video with auto-captions (e.g., TED Talks, tutorials, or news).' 
+});
     }
 
     const fullText = transcriptData.map(item => item.text).join(' ');
@@ -56,3 +58,4 @@ export default async function handler(req, res) {
     res.status(500).json({ error: 'Something went wrong' });
   }
 }
+
