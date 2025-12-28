@@ -5,6 +5,7 @@
     "dev": "vercel dev"
   },
   "dependencies": {
-    "youtube-transcript": "^0.2.2"
-  }
+  "youtube-transcript": "^1.0.6"
+}
+
 }
