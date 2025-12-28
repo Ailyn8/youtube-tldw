@@ -1,0 +1,10 @@
+{
+  "name": "youtube-tldw",
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "vercel dev"
+  },
+  "dependencies": {
+    "youtube-transcript": "^0.2.2"
+  }
+}

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>TL;DW – Too Long; Didn’t Watch</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; max-width: 700px; margin: 40px auto; padding: 0 20px; }
+    input { width: 100%; padding: 12px; margin: 10px 0; font-size: 16px; }
+    button { background: #0070f3; color: white; border: none; padding: 12px 24px; font-size: 16px; cursor: pointer; }
+    #result { margin-top: 20px; padding: 15px; background: #f6f8fa; border-radius: 6px; white-space: pre-wrap; }
+    .loading { opacity: 0.6; }
+  </style>
+</head>
+<body>
+  <h1>TL;DW</h1>
+  <p>Paste a YouTube video link to get a short summary:</p>
+  <input type="url" id="url" placeholder="https://www.youtube.com/watch?v=..." />
+  <button onclick="summarize()">Summarize</button>
+  <div id="result"></div>
+
+  <script>
+    async function summarize() {
+      const input = document.getElementById('url');
+      const result = document.getElementById('result');
+      const url = input.value.trim();
+      if (!url) return alert('Please enter a YouTube URL');
+
+      result.textContent = '⏳ Summarizing...';
+      result.className = 'loading';
+
+      try {
+        const response = await fetch('/api/summarize', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ url })
+        });
+        const data = await response.json();
+        if (response.ok) {
+          result.textContent = data.summary;
+          result.className = '';
+        } else {
+          result.textContent = '❌ ' + (data.error || 'Failed');
+          result.className = '';
+        }
+      } catch (err) {
+        result.textContent = '❌ Network error. Check console.';
+        result.className = '';
+      }
+    }
+  </script>
+</body>
+</html>
