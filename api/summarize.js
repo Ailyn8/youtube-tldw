@@ -1,5 +1,5 @@
 // api/summarize.js
-import { getTranscript } from 'youtube-transcript';
+import { YouTubeTranscript } from 'youtube-transcript';
 
 const HF_TOKEN = process.env.HUGGING_FACE_API_KEY;
 const SUMMARIZE_API = "https://api-inference.huggingface.co/models/facebook/bart-large-cnn";
@@ -15,23 +15,26 @@ export default async function handler(req, res) {
   }
 
   try {
-    // Extract YouTube video ID
+    // Extract video ID
     const videoId = url.split('v=')[1]?.split('&')[0];
     if (!videoId) {
       return res.status(400).json({ error: 'Invalid YouTube URL' });
     }
 
-    // Fetch transcript
+    // Get transcript
     let transcriptData;
     try {
-      transcriptData = await getTranscript({ videoId });
+      transcriptData = await YouTubeTranscript.fetchTranscript(videoId);
     } catch (e) {
       return res.status(400).json({ 
-  error: 'No transcript found. Try a video with auto-captions (e.g., TED Talks, tutorials, or news).' 
-});
+        error: 'No transcript found. Try a different video — some videos have captions but no downloadable transcript.' 
+      });
     }
 
+    // Combine all text
     const fullText = transcriptData.map(item => item.text).join(' ');
+
+    // Truncate if too long
     const inputText = fullText.length > 10000 ? fullText.substring(0, 10000) : fullText;
 
     // Summarize via Hugging Face
@@ -45,7 +48,7 @@ export default async function handler(req, res) {
     });
 
     if (!hfResponse.ok) {
-      return res.status(500).json({ error: 'Failed to generate summary' });
+      return res.status(500).json({ error: 'Failed to summarize (Hugging Face error)' });
     }
 
     const summaryData = await hfResponse.json();
@@ -54,8 +57,7 @@ export default async function handler(req, res) {
     res.status(200).json({ summary, videoId });
 
   } catch (error) {
-    console.error("Error:", error);
-    res.status(500).json({ error: 'Something went wrong' });
+    console.error("Server error:", error);
+    res.status(500).json({ error: 'Something went wrong. Try again.' });
   }
 }
-
